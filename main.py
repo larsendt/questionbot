@@ -77,6 +77,7 @@ def on_message(ws, msg_text, slack):
 
 def on_error(ws, error, slack):
     L.error("Got a slack error: %s" % error)
+    raise Exception("Slack error: %s" % error)
 
 def on_close(ws, slack):
     L.warn("Connection closed")
@@ -84,7 +85,7 @@ def on_close(ws, slack):
 def on_open(ws, slack):
     L.info("Connection opened")
 
-def main():
+def run_questionbot():
     L.info("Starting QuestionBot")
     slack = Slacker(get_api_token())
     r = slack.rtm.start()
@@ -98,6 +99,21 @@ def main():
             on_close = lambda ws: on_close(ws, slack))
     ws.on_open = lambda ws: on_open(ws, slack)
     ws.run_forever()
+
+def main():
+    max_consecutive_errors = 5
+    consecutive_errors = 0
+    while True:
+        try:
+            run_questionbot()
+            consecutive_errors = 0
+        except Exception as e:
+            consecutive_errors += 1
+            L.error("Unhandled exception, have had %d consecutive errors" % consecutive_errors)
+            L.error(traceback.format_exc(e))
+            if consecutive_errors > max_consecutive_errors:
+                L.error("Hit max consecutive errors, shutting down")
+                return
 
 if __name__ == "__main__":
     main()
