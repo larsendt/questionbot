@@ -8,7 +8,6 @@ if not os.path.exists(CACHE_DIR):
     os.makedirs(CACHE_DIR)
 
 def make_id(args, kwargs):
-    print args
     _id = "".join(args) 
     if kwargs:
         _id += "".join(kwargs.keys()) + "".join(kwargs.values())
@@ -35,7 +34,6 @@ def cache_exists(_id):
 def disk_cache(func):
     @functools.wraps(func)
     def wrapper(*args, **kwargs):
-        print args
         _id = make_id(args, kwargs)
         if cache_exists(_id):
             return cache_get(_id)

@@ -6,7 +6,7 @@ import time
 import json
 import sys
 import basic_logger
-import markov
+import response
 
 L = basic_logger.Logger("main")
 
@@ -62,7 +62,7 @@ def generate_reply(slack, channel_id, message):
         "id": 1,
         "type": "message",
         "channel": channel_id,
-        "text": markov.make_response(message),
+        "text": response.make_response(message),
     }
     return json.dumps(obj)
 
@@ -71,7 +71,6 @@ def decode_message(msg_text):
 
 def on_message(ws, msg_text, slack):
     message = decode_message(msg_text)
-    print message
     if is_targeted_message(slack, "questionbot", message):
         L.info("Got message from user %s" % get_user_name(slack, message["user"]))
 
