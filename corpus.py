@@ -3,7 +3,10 @@ import re
 import cache
 import basic_logger
 import pygoogle
+from bs4 import BeautifulSoup
 import wikipedia
+import requests
+import random
 
 class WikipediaCorpus(object):
     def __init__(self, query):
@@ -54,3 +57,54 @@ class WikipediaCorpus(object):
 
     def corpus(self):
         return self._corpus
+
+class BlogspotCorpus(object):
+    def __init__(self, query):
+        self.l = basic_logger.Logger("BlogspotCorpus")
+        self._query = "site:blogspot.com " + self._clean_query(query)
+        self._corpus = self._create_corpus(self._query)
+
+    def _clean_query(self, query):
+        return re.sub("[.,-\/#!$%\^&\*;:{}=\-_`~()]", "", query)
+
+    def _results_are_acceptable(self, search_results, query):
+        return len(search_results) > 0
+
+    def _create_corpus(self, query):
+        @cache.disk_cache
+        def _get_goog_urls(query):
+            g = pygoogle.pygoogle(query)
+            g.pages = 1 
+            g.hl = "en"
+            self.l.info("Google search result count: %s" % g.get_result_count())
+            if g.get_result_count() > 0:
+                return g.search_page_wise()[0]
+            else:
+                g = pygoogle.pygoogle("site:blogspot.com groot")
+                g.pages = 1
+                g.hl = "en"
+                self.l.info("No results for original query, retrying with 'groot'")
+                return g.search_page_wise()[0]
+
+        @cache.disk_cache
+        def _page_fetch(url):
+            r = requests.get(url)
+            soup = BeautifulSoup(r.text)
+            elems = soup.findAll(text=True)
+            def visible(element):
+                if element.parent.name in ['style', 'script', '[document]', 'head', 'title']:
+                    return False
+                elif re.match('<!--.*-->', unicode(element)):
+                    return False
+                return True
+            elems = map(unicode, filter(visible, elems))
+            return " ".join(elems)
+
+        urls = _get_goog_urls(query)
+        url = random.choice(urls)
+        self.l.info("Using url: " + url)
+        return _page_fetch(url)
+
+    def corpus(self):
+        return self._corpus
+
