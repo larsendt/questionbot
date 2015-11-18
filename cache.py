@@ -12,6 +12,7 @@ def make_id(args, kwargs):
     _id = "".join(args) 
     if kwargs:
         _id += "".join(kwargs.keys()) + "".join(kwargs.values())
+    _id = _id.encode("utf-8")
     return hashlib.sha1(_id).hexdigest()
 
 def cache_get(_id):
