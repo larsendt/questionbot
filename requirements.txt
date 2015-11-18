@@ -1,0 +1,6 @@
+arrow==0.7.0
+functools32==3.2.3.post2
+pygoogle-simple==0.2.3
+slacker==0.7.9
+websocket-client==0.34.0
+wikipedia==1.4.0
