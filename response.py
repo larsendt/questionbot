@@ -15,8 +15,9 @@ def make_response(message):
         L.info("Didn't ask a question")
         return "Ask me a question, you groot!"
 
-    wiki = corpus.WikipediaCorpus(message)
-    chain = markov.MarkovChain(wiki.corpus())
+    #c = corpus.WikipediaCorpus(message)
+    c = corpus.BlogspotCorpus(message)
+    chain = markov.MarkovChain(c.corpus())
 
     sentence_list = []
     cur_word = chain.get_random_start()
