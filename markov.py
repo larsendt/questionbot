@@ -4,6 +4,9 @@ import random
 import re
 from collections import defaultdict
 import cache
+import basic_logger
+
+L = basic_logger.Logger("markov")
 
 class MarkovChain(object):
     def __init__(self, corpus):
@@ -24,8 +27,11 @@ class MarkovChain(object):
 
     def get_random_start(self):
         choice = random.choice(self._model.keys())
-        while choice.endswith(".") and ord("A") <= choice[0] <= ord("Z"):
-            choice = random.choice(self._model.keys())
+        for i in range(100):
+            if choice.endswith(".") or not (ord("A") <= ord(choice[0]) <= ord("Z")):
+                choice = random.choice(self._model.keys())
+            else:
+                break
         return choice
 
     def get_word(self, context):
@@ -47,6 +53,9 @@ def clean_corpus(text):
     corpus = re.sub("\s+", " ", corpus)
     return corpus
 
+def clean_query(query):
+    return re.sub("[.,-\/#!$%\^&\*;:{}=\-_`~()]", "", query)
+
 def results_are_acceptable(search_results, query):
     """ Idea for this function: Wikipedia sometimes returns totally unrelated
         pages, so do some sort of Hamming distance on the results and the
@@ -59,19 +68,30 @@ def create_corpus(message):
     if results_are_acceptable(pages, message):
         try:
             page = wikipedia.page(pages[0])
+            L.info("Using page for %s" % pages[0])
         except wikipedia.DisambiguationError as e:
             page = wikipedia.page(e.options[0])
+            L.info("After disambiguation, using page for %s" % e.options[0])
     else:
+        L.info("No acceptable page for query, using Groot")
         page = wikipedia.page("Groot")
 
     return clean_corpus(page.content)
 
 def make_response(message):
-    corpus = create_corpus(message)
+    if "?" not in message:
+        L.info("Didn't ask a question")
+        return "Ask me a question, you groot!"
+    query = clean_query(message)
+    L.info("Query '%s'" % query)
+    corpus = create_corpus(query)
     chain = MarkovChain(corpus)
     sentence_list = []
     cur_word = chain.get_random_start()
+    sentence_list.append(cur_word)
     while not cur_word.endswith("."):
         cur_word = chain.get_word(cur_word)
         sentence_list.append(cur_word)
-    return " ".join(sentence_list)
+    reply = " ".join(sentence_list)
+    L.info("Reply: '%s'" % reply)
+    return reply
