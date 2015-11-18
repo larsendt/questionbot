@@ -6,6 +6,7 @@ import time
 import json
 import sys
 import basic_logger
+import markov
 
 L = basic_logger.Logger("main")
 
@@ -56,12 +57,12 @@ def is_targeted_message(slack, user_name, message):
     mention = "<@%s>" % uid
     return "text" in message and mention in message["text"]
 
-def generate_reply(slack, channel_id):
+def generate_reply(slack, channel_id, message):
     obj = {
         "id": 1,
         "type": "message",
         "channel": channel_id,
-        "text": "'Sup groots",
+        "text": markov.make_response(message),
     }
     return json.dumps(obj)
 
@@ -73,7 +74,11 @@ def on_message(ws, msg_text, slack):
     print message
     if is_targeted_message(slack, "questionbot", message):
         L.info("Got message from user %s" % get_user_name(slack, message["user"]))
-        ws.send(generate_reply(slack, message["channel"]))
+
+        uid = get_user_id(slack, "questionbot")
+        mention = "<@%s>" % uid
+        stripped_message = message["text"].replace(mention, "")
+        ws.send(generate_reply(slack, message["channel"], stripped_message))
 
 def on_error(ws, error, slack):
     L.error("Got a slack error: %s" % error)
