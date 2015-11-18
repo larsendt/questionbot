@@ -29,9 +29,11 @@ def make_response(message):
     sentence_list = []
     cur_word = chain.get_random_start()
     sentence_list.append(cur_word)
-    while not cur_word.endswith("."):
+    for i in range(100):
         cur_word = chain.get_word(cur_word)
         sentence_list.append(cur_word)
+        if cur_word.endswith("."):
+            break
     reply = " ".join(sentence_list)
     L.info("Reply: '%s'" % reply)
     
