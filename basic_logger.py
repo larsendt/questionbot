@@ -21,4 +21,4 @@ class Logger(object):
     def write(self, msg):
         print(msg)
         with open(LOGFILE, "a") as f:
-            f.write(msg + "\n")
+            f.write((msg.encode("utf-8")) + "\n")
