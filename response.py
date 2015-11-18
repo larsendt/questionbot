@@ -8,6 +8,13 @@ L = basic_logger.Logger("response")
 def is_question(message):
     return "?" in message
 
+def is_christmas(message):
+    msg = message.lower()
+    return " santa " in msg or " christmas " in msg or " holiday " in msg
+
+def add_christmas(message):
+    return ":sexysanta:" + message + ":sexysanta:"
+
 def make_response(message):
     L.info("Query '%s'" % message)
 
@@ -27,4 +34,8 @@ def make_response(message):
         sentence_list.append(cur_word)
     reply = " ".join(sentence_list)
     L.info("Reply: '%s'" % reply)
-    return reply
+    
+    if is_christmas(message):
+        return add_christmas(reply)
+    else:
+        return reply
