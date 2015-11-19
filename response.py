@@ -10,7 +10,7 @@ def is_question(message):
 
 def is_christmas(message):
     msg = message.lower()
-    return " santa " in msg or " christmas " in msg or " holiday " in msg
+    return " santa " in msg or "christmas" in msg or "holiday" in msg
 
 def add_christmas(message):
     return ":sexysanta:" + message + ":sexysanta:"
