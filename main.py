@@ -7,6 +7,7 @@ import json
 import sys
 import basic_logger
 import response
+import traceback
 
 L = basic_logger.Logger("main")
 
@@ -34,7 +35,7 @@ def get_channel_name(slack, channel_id):
         if channel["id"] == channel_id:
             L.info("Channel name for ID %s is %s" % (channel_id, channel["name"]))
             return channel["id"]
-    L.warn("No channel name for ID: %s" % channel_name)
+    L.warn("No channel name for ID: %s" % channel_id)
 
 @functools.lru_cache(maxsize=16)
 def get_user_id(slack, user_name):
@@ -57,6 +58,9 @@ def is_targeted_message(slack, user_name, message):
     mention = "<@%s>" % uid
     return "text" in message and mention in message["text"]
 
+def is_direct_message(message):
+    return "channel" in message and message["channel"].startswith("D") and message["type"] == "message"
+
 def generate_reply(slack, channel_id, message):
     obj = {
         "id": 1,
@@ -71,7 +75,7 @@ def decode_message(msg_text):
 
 def on_message(ws, msg_text, slack):
     message = decode_message(msg_text)
-    if is_targeted_message(slack, "questionbot", message):
+    if is_targeted_message(slack, "questionbot", message) or is_direct_message(message):
         L.info("Got message from user %s" % get_user_name(slack, message["user"]))
 
         uid = get_user_id(slack, "questionbot")
