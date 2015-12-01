@@ -23,7 +23,8 @@ def make_response(message):
         return "Ask me a question, you groot!"
 
     #c = corpus.WikipediaCorpus(message)
-    c = corpus.BlogspotCorpus(message)
+    #c = corpus.BlogspotCorpus(message)
+    c = corpus.ShakespeareCorpus(message)
     chain = markov.MarkovChain(c.corpus())
 
     sentence_list = []

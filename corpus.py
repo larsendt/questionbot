@@ -108,3 +108,20 @@ class BlogspotCorpus(object):
     def corpus(self):
         return self._corpus
 
+class ShakespeareCorpus(object):
+    def __init__(self, query):
+        self.l = basic_logger.Logger("ShakespeareCorpus")
+        self._corpus = self._create_corpus()
+
+    def _create_corpus(self):
+        url = "https://larsendt.com/pg100.txt"
+
+        @cache.disk_cache
+        def fetch(url):
+            r = requests.get(url)
+            return r.text
+
+        return fetch(url)
+
+    def corpus(self):
+        return self._corpus
