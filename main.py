@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 from slacker import Slacker
 import websocket
 import functools32 as functools
