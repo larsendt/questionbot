@@ -6,8 +6,6 @@ LOGFILE = "slack.log"
 class Logger(object):
     def __init__(self, name):
         self._name = name
-        with open(LOGFILE, "w") as f:
-            f.write("")
 
     def info(self, msg):
         self.write("%s -- [%s:INFO] -- %s" % (arrow.now(), self._name, msg))
